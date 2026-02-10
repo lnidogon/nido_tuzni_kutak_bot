@@ -74,7 +74,8 @@ async def color(ctx, member: discord.Member, hexcode: str):
         "lightgray": "#d3d3d3",
         "gray": "#808080",
         "darkgray": "#404040",
-        "black": "#000000"
+        "black": "#000000",
+        "benja":  "#cb21b2"
     }
     if hexcode.lower() in COLOR_MAP:
         hexcode = COLOR_MAP[hexcode.lower()]
