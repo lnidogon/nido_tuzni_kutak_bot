@@ -44,6 +44,10 @@ async def obojime(ctx, hexcode: str):
     await ctx.send(f"Green na midu")
 
 @bot.command()
+async def lakunoc(ctx):
+    await ctx.send(f"Laku noć i tebi {ctx.author}")
+
+@bot.command()
 async def obojiga(ctx, member: discord.Member, hexcode: str):
     await color(ctx, member, hexcode)
     await ctx.send(f"Green nam idu")
