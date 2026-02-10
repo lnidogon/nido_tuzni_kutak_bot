@@ -45,7 +45,7 @@ async def obojime(ctx, hexcode: str):
 
 @bot.command()
 async def lakunoc(ctx):
-    await ctx.send(f"Laku noć i tebi {ctx.author}")
+    await ctx.send(f"Laku noć i tebi {ctx.author.mention}")
 
 @bot.command()
 async def obojiga(ctx, member: discord.Member, hexcode: str):
