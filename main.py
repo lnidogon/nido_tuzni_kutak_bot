@@ -4,14 +4,31 @@ import logging
 from dotenv import load_dotenv
 import os
 import asyncio
+from utils import *
+import re
+from StatsManager import StatsManager
+from functools import wraps
 
 load_dotenv()
 token = os.getenv('DISCORD_TOKEN')
 
+stats_manager = StatsManager()
 handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
 intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
+
+def player_only(func):
+    @wraps(func)
+    async def wrapper(ctx, *args, **kwargs):
+        member = args[0]
+        if member == None:
+            member = ctx.author
+        if member.id not in stats_manager.get_stats():
+            await ctx.send("Osoba nije prijavljena!")
+            return
+        return await func(ctx, *args, **kwargs)
+    return wrapper
  
 bot = commands.Bot(command_prefix=['?', 'jasamotacgoriot ', '`'], intents=intents)
 
@@ -27,7 +44,11 @@ async def on_member_join(member):
 async def on_message(message):
     if message.author == bot.user:
         return
-    if "battle cats" in message.content.lower():
+    banned_re = [
+        r"^.*b.*a.*t.*t.*[l1].*[e3].*c.*a.*t.*$", 
+        r"^.*c.*o.*u.*p.*c.*a.*t.*$"
+    ]
+    if any(re.match(reg, message.content.lower(), re.DOTALL) for reg in banned_re):
         await message.delete()
         await message.channel.send(f"{message.author.mention} - oprezno s time...")
     if message.content[0] == '`':
@@ -52,55 +73,57 @@ async def obojiga(ctx, member: discord.Member, hexcode: str):
     await color(ctx, member, hexcode)
     await ctx.send(f"Green nam idu")
 
-async def color(ctx, member: discord.Member, hexcode: str):
-    COLOR_MAP = {
-        "red": "#ff0000",
-        "darkred": "#8b0000",
-        "orange": "#ffa500",
-        "gold": "#ffd700",
-        "yellow": "#ffff00",
-        "green": "#00ff00",
-        "darkgreen": "#006400",
-        "lime": "#32cd32",
-        "cyan": "#00ffff",
-        "teal": "#008080",
-        "blue": "#0000ff",
-        "navy": "#000080",
-        "skyblue": "#87ceeb",
-        "purple": "#800080",
-        "violet": "#ee82ee",
-        "magenta": "#ff00ff",
-        "pink": "#ffc0cb",
-        "hotpink": "#ff69b4",
-        "brown": "#8b4513",
-        "chocolate": "#d2691e",
-        "white": "#ffffff",
-        "lightgray": "#d3d3d3",
-        "gray": "#808080",
-        "darkgray": "#404040",
-        "black": "#000000",
-        "benja":  "#cb21b2"
-    }
-    if hexcode.lower() in COLOR_MAP:
-        hexcode = COLOR_MAP[hexcode.lower()]
-    hexcode = hexcode.lstrip("#")
-    guild = ctx.guild
-    try:
-        color_value = int(hexcode, 16)
-    except:
-        await ctx.send("Ovo nije boja u koju te mogu obojati")
+@bot.command()
+async def zeliseigrati(ctx, member: discord.Member = None):
+    if member == None:
+        await ctx.send(f"Tko?")
         return
-    color = discord.Color(color_value)
-    role_name = f"Goriot-blagoslov-{member.id}"
-    role = discord.utils.get(guild.roles, name=role_name)
-    target_position = guild.me.top_role.position - 1
-    if role is None:
-        role = await guild.create_role(
-            name=role_name,
-            color=color
+    await zelimseigrati(ctx, member, True)
+
+
+#TODO: napraviti da samo bot moze postaviti bot_called na true
+@bot.command() 
+async def zelimseigrati(ctx, member: discord.Member = None, bot_called: bool = False):
+    if member == None:
+        member = ctx.author
+    if stats_manager.init_person(member.id):
+        if not bot_called:
+            await ctx.send(f"{member.mention} se pridružio našoj maloj igri...") 
+        else:
+            await ctx.send(f"{ctx.author.mention} je uvukao {member.mention} u našu malu igru...")
+    else:
+        await ctx.send(f"Cijenim tvoju veliku želju za igranjem, ali jedna prijava je dovoljna!") 
+
+@bot.command()
+@player_only
+async def kredit(ctx, member: discord.Member = None):
+    if member == None:
+        member = ctx.author 
+    await ctx.send(f"{member.mention} ima {stats_manager.get_stats()[member.id].get_data().get('goriot_credit', 0)} goriot kredita")
+
+@bot.command()
+async def ljestvica(ctx):
+    table = []
+    for member_id, stats in stats_manager.get_stats().items():
+        member = ctx.guild.get_member(member_id)
+        if member:
+            name = member.display_name
+        else:
+            continue
+        table.append([name, stats.get_data().get("goriot_credit", 0)])
+    name_width = max(len(str(row[0])) for row in table)
+    credit_width = max(len(str(row[1])) for row in table)
+    lines = []
+    lines.append(f"{'Ime'.ljust(name_width)} | {'Goriot kredit'.rjust(credit_width)}")
+    lines.append(f"{'-' * name_width}-+-{'-' * credit_width}")
+    for name, credit in table:
+        lines.append(
+            f"{str(name).ljust(name_width)} | {str(credit).rjust(credit_width)}"
         )
-        await asyncio.sleep(5)
-    await role.edit(color=color, position=target_position)
-    await member.add_roles(role)
+        
+    output_string = "```" + "\n".join(lines) + "```"
+    await ctx.send(output_string)
+
+
 
 bot.run(token, log_handler=handler, log_level=logging.DEBUG)
