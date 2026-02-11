@@ -47,6 +47,9 @@ class StatsManager:
         for name, value in coef.items():
             self.stats[member_id].update_stat(name + 'factor', value)
         self.stats[member_id].normalise_factors()
+    @save_func
+    def give_credit(self, member_id: int, amount: float):
+        self.stats[member_id].update_stat("goriot_credit", amount)
 
     @save_func
     def init_person(self, member_id: int):

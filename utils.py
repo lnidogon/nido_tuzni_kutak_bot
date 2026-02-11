@@ -1,9 +1,25 @@
+from functools import wraps
 import discord
 from discord.ext import commands
 import logging 
 from dotenv import load_dotenv
 import os
 import asyncio
+
+def player_only(func):
+    @wraps(func)
+    async def wrapper(self, ctx, *args, **kwargs):
+        from main import stats_manager
+        member = None
+        if len(args) > 0 and isinstance(args[0], discord.Member):
+            member = args[0]
+        if member == None:
+            member = ctx.author
+        if member.id not in stats_manager.get_stats():
+            await ctx.send("Osoba nije prijavljena!")
+            return
+        return await func(self, ctx, *args, **kwargs)
+    return wrapper
 
 
 async def color(ctx, member: discord.Member, hexcode: str):

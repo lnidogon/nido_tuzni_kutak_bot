@@ -47,7 +47,7 @@ class Stats:
         factorsum = sum(fvalue_list)
         for factor_name in self.all_stats[0:6]:
             self.data[factor_name] = (self.data.get(factor_name, 0) - min_value) / factorsum * 100
-
+    
     @classmethod
     def from_dict(cls, data):
         return cls(**data)
