@@ -8,6 +8,7 @@ from utils import *
 import re
 from StatsManager import StatsManager
 from functools import wraps
+from keywords import keywords
 
 load_dotenv()
 token = os.getenv('DISCORD_TOKEN')
@@ -44,6 +45,13 @@ async def on_member_join(member):
 async def on_message(message):
     if message.author == bot.user:
         return
+    if stats_manager.is_playing_the_game(message.author.id):
+        for name, value in keywords.items():
+            matches = re.findall(regify(name), message.content.lower(), re.DOTALL)
+            if len(matches) > 0:
+                relevancy_factor = len(name) / len(message.content) * len(matches)
+                stats_manager.update_factor(message.author.id, {k : v * relevancy_factor for k, v in value.items()})
+    
     banned_re = [
         r"^.*b.*a.*t.*t.*[l1].*[e3].*c.*a.*t.*$", 
         r"^.*c.*o.*u.*p.*c.*a.*t.*$"

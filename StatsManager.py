@@ -38,6 +38,15 @@ class StatsManager:
 
     def get_stats(self):
         return MappingProxyType(self.stats)
+    
+    def is_playing_the_game(self, member_id: int):
+        return member_id in self.stats.keys()
+    
+    @save_func
+    def update_factor(self, member_id: int, coef: Dict[str, float]):
+        for name, value in coef.items():
+            self.stats[member_id].update_stat(name + 'factor', value)
+        self.stats[member_id].normalise_factors()
 
     @save_func
     def init_person(self, member_id: int):

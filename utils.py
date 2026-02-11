@@ -56,3 +56,7 @@ async def color(ctx, member: discord.Member, hexcode: str):
         await asyncio.sleep(5)
     await role.edit(color=color, position=target_position)
     await member.add_roles(role)
+
+def regify(s: str):
+    rets = '.*?'.join(s)
+    return rets

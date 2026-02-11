@@ -34,6 +34,20 @@ class Stats:
     def get_data(self):
         return MappingProxyType(self.data)
 
+    def update_stat(self, name: str, coef: float):
+        if name not in self.data:
+            print(f"{name} is not a stat")
+        self.data[name] = self.data.get(name, 0) + coef
+
+    def normalise_factors(self):
+        fvalue_list = [self.data.get(x, 0) for x in self.all_stats[0:6]]
+        min_value = min(fvalue_list)
+        for i in range(6):
+            fvalue_list[i] = fvalue_list[i] - min_value
+        factorsum = sum(fvalue_list)
+        for factor_name in self.all_stats[0:6]:
+            self.data[factor_name] = (self.data.get(factor_name, 0) - min_value) / factorsum * 100
+
     @classmethod
     def from_dict(cls, data):
         return cls(**data)
