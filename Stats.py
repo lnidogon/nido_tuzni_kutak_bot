@@ -1,7 +1,7 @@
 from typing import List, Dict
 from types import MappingProxyType
 class Stats:
-    data: Dict[str, float] = {}
+    data: Dict[str, float]
     all_stats: List[str] = [
         "vfactor", 
         "bfactor", 
@@ -21,6 +21,7 @@ class Stats:
         ]
 
     def __init__(self, **kwargs):
+        data = {}
         if kwargs:
             self.data  = {key: float(val) for key, val in kwargs.items()}
         self.actualise()
