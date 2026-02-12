@@ -39,6 +39,9 @@ class StatsManager:
     def get_stats(self):
         return MappingProxyType(self.stats)
     
+    def get_credit(self, id: int):
+        return self.get_stats()[id].get_data()['goriot_credit']
+
     def is_playing_the_game(self, member_id: int):
         return member_id in self.stats.keys()
     
@@ -47,6 +50,7 @@ class StatsManager:
         for name, value in coef.items():
             self.stats[member_id].update_stat(name + 'factor', value)
         self.stats[member_id].normalise_factors()
+        
     @save_func
     def give_credit(self, member_id: int, amount: float):
         self.stats[member_id].update_stat("goriot_credit", amount)

@@ -21,7 +21,7 @@ class Stats:
         ]
 
     def __init__(self, **kwargs):
-        data = {}
+        self.data = {}
         if kwargs:
             self.data  = {key: float(val) for key, val in kwargs.items()}
         self.actualise()

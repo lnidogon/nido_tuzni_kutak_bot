@@ -10,14 +10,14 @@ def player_only(func):
     @wraps(func)
     async def wrapper(self, ctx, *args, **kwargs):
         from main import stats_manager
-        member = None
-        if len(args) > 0 and isinstance(args[0], discord.Member):
-            member = args[0]
-        if member == None:
-            member = ctx.author
-        if member.id not in stats_manager.get_stats():
-            await ctx.send("Osoba nije prijavljena!")
+        if not stats_manager.is_playing_the_game(ctx.author.id):
+            await ctx.send("Molimo prijavite se kako biste koristili ovu naredbu!")
             return
+        for arg in args:
+            if isinstance(arg, discord.Member):
+                if arg.id not in stats_manager.get_stats():
+                    await ctx.send("Spominje se osoba koja nije prijavljena!")
+                    return
         return await func(self, ctx, *args, **kwargs)
     return wrapper
 

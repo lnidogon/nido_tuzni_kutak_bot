@@ -18,6 +18,7 @@ handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w'
 intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True  
+intents.reactions = True
 
 class MyBot(commands.Bot):
     def __init__(self):
@@ -59,11 +60,13 @@ async def on_message(message):
         r"^.*b.*a.*t.*t.*[l1].*[e3].*c.*a.*t.*$", 
         r"^.*c.*o.*u.*p.*c.*a.*t.*$"
     ]
-    if any(re.match(reg, message.content.lower(), re.DOTALL) for reg in banned_re):
+    if any(re.match(reg, message.content.lower()) for reg in banned_re):
         await message.delete()
         await message.channel.send(f"{message.author.mention} - oprezno s time...")
-    if message.content[0] == '`':
-        await message.delete()
+
+    # if message.content[0] == '`':
+    #     await message.delete()
+
     await bot.process_commands(message)
     
 if __name__ == "__main__":

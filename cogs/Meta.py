@@ -49,7 +49,7 @@ class Meta(commands.Cog):
                 name = member.display_name
             else:
                 continue
-            table.append([name, stats.get_data().get("goriot_credit", 0)])
+            table.append([name, round(stats.get_data().get("goriot_credit", 0), 3)])
         name_width = max(len(str(row[0])) for row in table)
         credit_width = max(len(str(row[1])) for row in table)
         lines = []
