@@ -18,7 +18,7 @@ class Game(commands.Cog):
         amount = random.gauss(1, 1.5)
         amount = round(amount)
         amount = max(1, min(amount, 5))
-        self.stats_manager.give_credit(ctx.author.id, amount)
+        await self.stats_manager.give_credit(ctx.author.id, amount)
         await ctx.send(f"{ctx.author.mention} je kopao kopao i iskopao {amount} goriot kredita!")
 
 
@@ -31,7 +31,7 @@ class Game(commands.Cog):
         if self.stats_manager.get_stats()[ctx.author.id].get_data()["goriot_credit"] < amount:
             await ctx.send(f"Nedovoljan iznos na računu...")
             return
-        self.stats_manager.give_credit(ctx.author.id, -amount)
+        await self.stats_manager.give_credit(ctx.author.id, -amount)
         options = [
             [22, 0, f"Podsjetnik zašto je klađenje loše, {ctx.author.mention} je izgubio sve uloženo. (-{amount}gk)"],
             [11, 0.2, f"Aj bar neš, {ctx.author.mention} je izgubio {0.8 * amount} goriot kredita. (-{0.8 * amount}gk)"],
@@ -42,7 +42,7 @@ class Game(commands.Cog):
             [1, 10, f"DRAGI KAMEN UPOZORENJE - {ctx.author.mention} je osvojio glavnu nagradu i osvojio {10 * amount} goriot kredita!!! (+{10 * amount}gk)"]
         ]
         chosen = random.choices(options, weights=[w[0] for w in options], k=1)[0]
-        self.stats_manager.give_credit(ctx.author.id, amount * chosen[1])
+        await self.stats_manager.give_credit(ctx.author.id, amount * chosen[1])
         await ctx.send(chosen[2])
         
 
@@ -61,9 +61,9 @@ class Game(commands.Cog):
         
         amount = round(random.uniform(10, 25), 2)
         amount_back = round(random.uniform(amount/2, amount), 2)
-        self.stats_manager.update_stat(ctx.author.id, "steals", 1)
-        self.stats_manager.give_credit(ctx.author.id, amount_back)
-        self.stats_manager.give_credit(member.id, -amount)
+        await self.stats_manager.update_stat(ctx.author.id, "steals", 1)
+        await self.stats_manager.give_credit(ctx.author.id, amount_back)
+        await self.stats_manager.give_credit(member.id, -amount)
         await ctx.send(f"Muahaha, {ctx.author.mention} je pokrao {amount} goriot kredita od {member.mention} i time se obogatio za {amount_back} goriot kredita.")
 
 
@@ -78,8 +78,8 @@ class Game(commands.Cog):
         if self.stats_manager.get_credit(ctx.author.id) < 2:
             await ctx.send("Nedovoljno goriot kredita za zahvalu.")
             return
-        self.stats_manager.give_credit(ctx.author.id, -2)
-        self.stats_manager.give_credit(member.id, 5)
+        await self.stats_manager.give_credit(ctx.author.id, -2)
+        await self.stats_manager.give_credit(member.id, 5)
         await ctx.send(f"Holsom, {ctx.author.mention} je donirao 5 goriot kredita  {member.mention} iz zahvale.")
 
 
@@ -104,7 +104,7 @@ class Game(commands.Cog):
                     users.add(u.id)
             users.discard(author_id)
             if len(users) >= min_votes:
-                self.stats_manager.give_credit(author_id, amount)
+                await self.stats_manager.give_credit(author_id, amount)
                 await message.channel.send(f"<@{author_id}> je zaradio {amount} goriot kredita!")
                 await message.delete()
                 del self.active_polls[message.id]
@@ -133,8 +133,8 @@ class Game(commands.Cog):
         if unjudged_steals == 0:
             await ctx.send(f"Osoba nema krađa koje nisu bile ružno pogledane.")
             return
-        self.stats_manager.give_credit(ctx.author.id, 10 * unjudged_steals)
-        self.stats_manager.update_stat(member.id, 'judged_steals', unjudged_steals)
+        await self.stats_manager.give_credit(ctx.author.id, 10 * unjudged_steals)
+        await self.stats_manager.update_stat(member.id, 'judged_steals', unjudged_steals)
         await ctx.send(f"{ctx.author.mention} je ružno pogledao {unjudged_steals} krađa koje je počinio {member.mention}, i time zaradio {10 * unjudged_steals} goriot kredita.")
 
 async def setup(bot):

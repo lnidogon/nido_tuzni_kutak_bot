@@ -6,9 +6,9 @@ from Stats import Stats
 from types import MappingProxyType
 
 def save_func(func):
-    def wrapper(self, *args, **kwargs):
-        result = func(self, *args, **kwargs)
-        self.save_stats()
+    async def wrapper(self, *args, **kwargs):
+        result = await func(self, *args, **kwargs)
+        await self.save_stats()
         return result
     return wrapper
 
@@ -17,6 +17,8 @@ class StatsManager:
     STATS_FILE = Path("stats.json")
     stats: Dict[int, Stats]
     def __init__(self):
+        self._lock = asyncio.Lock()
+        self.load_stats()
         self.load_stats()
 
 
@@ -32,9 +34,16 @@ class StatsManager:
             for member_id, stat_data in loaded_data.items()
         }
 
-    def save_stats(self):
-        with open(self.STATS_FILE, "w") as f:
-            json.dump({str(k): v.to_json() for k, v in self.stats.items()}, f, indent=4)
+    async def save_stats(self):
+        async with self._lock:
+            temp_file = self.STATS_FILE.with_suffix(".tmp")
+            with open(temp_file, "w") as f:
+                json.dump(
+                    {str(k): v.to_json() for k, v in self.stats.items()},
+                    f,
+                    indent=4
+                )
+            temp_file.replace(self.STATS_FILE)
 
     def get_stats(self):
         return MappingProxyType(self.stats)
@@ -49,21 +58,21 @@ class StatsManager:
         return member_id in self.stats.keys()
     
     @save_func
-    def update_factor(self, member_id: int, coef: Dict[str, float]):
+    async def update_factor(self, member_id: int, coef: Dict[str, float]):
         for name, value in coef.items():
             self.stats[member_id].update_stat(name + 'factor', value)
         self.stats[member_id].normalise_factors()
         
     @save_func
-    def update_stat(self, member_id: int, name: str, amount: int):
+    async def update_stat(self, member_id: int, name: str, amount: int):
         self.stats[member_id].update_stat(name, amount)
     
     @save_func
-    def give_credit(self, member_id: int, amount: float):
+    async def give_credit(self, member_id: int, amount: float):
         self.stats[member_id].update_stat("goriot_credit", amount)
 
     @save_func
-    def init_person(self, member_id: int):
+    async def init_person(self, member_id: int):
         if(member_id in self.stats.keys()):
             self.stats[member_id].actualise()
             return False

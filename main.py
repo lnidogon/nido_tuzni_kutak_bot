@@ -54,7 +54,7 @@ async def on_message(message):
             matches = re.findall(regify(name), message.content.lower(), re.DOTALL)
             if len(matches) > 0:
                 relevancy_factor = len(name) / len(message.content) * len(matches)
-                stats_manager.update_factor(message.author.id, {k : v * relevancy_factor for k, v in value.items()})
+                await stats_manager.update_factor(message.author.id, {k : v * relevancy_factor for k, v in value.items()})
     
     banned_re = [
         r"^.*b.*a.*t.*t.*[l1].*[e3].*c.*a.*t.*$", 

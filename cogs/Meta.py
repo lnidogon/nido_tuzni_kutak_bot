@@ -25,7 +25,7 @@ class Meta(commands.Cog):
     async def zelimseigrati(self, ctx, member: discord.Member = None, bot_called: bool = False):
         if member == None:
             member = ctx.author
-        if self.stats_manager.init_person(member.id):
+        if await self.stats_manager.init_person(member.id):
             if not bot_called:
                 await ctx.send(f"{member.mention} se pridružio našoj maloj igri...") 
             else:
