@@ -9,7 +9,9 @@ class Stats:
         "lfactor", 
         "nfactor", 
         "rfactor", 
+        
         "goriot_credit",
+        
         "sus",
         "pravicnost",
         "zloba",
@@ -17,7 +19,10 @@ class Stats:
         "benjavicnost",
         "rossini odanost",
         "closetness",
-        "gambling"
+        "gambling",
+        
+        "steals",
+        "judged_steals"
         ]
 
     def __init__(self, **kwargs):
@@ -27,7 +32,7 @@ class Stats:
         self.actualise()
     def actualise(self):
         for stat in self.all_stats:
-            if(stat not in self.data):
+            if(stat not in self.data.keys()):
                 self.data[stat] = 0
     def to_json(self):
         return {key: str(val) for key, val in self.data.items()}
@@ -39,7 +44,7 @@ class Stats:
         if name not in self.data:
             print(f"{name} is not a stat")
         self.data[name] = self.data.get(name, 0) + coef
-
+        
     def normalise_factors(self):
         fvalue_list = [self.data.get(x, 0) for x in self.all_stats[0:6]]
         min_value = min(fvalue_list)

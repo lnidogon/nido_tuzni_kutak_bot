@@ -39,6 +39,9 @@ class StatsManager:
     def get_stats(self):
         return MappingProxyType(self.stats)
     
+    def get_stat(self, id: int, name: str):
+        return self.get_stats()[id].get_data()[name]
+    
     def get_credit(self, id: int):
         return self.get_stats()[id].get_data()['goriot_credit']
 
@@ -51,6 +54,10 @@ class StatsManager:
             self.stats[member_id].update_stat(name + 'factor', value)
         self.stats[member_id].normalise_factors()
         
+    @save_func
+    def update_stat(self, member_id: int, name: str, amount: int):
+        self.stats[member_id].update_stat(name, amount)
+    
     @save_func
     def give_credit(self, member_id: int, amount: float):
         self.stats[member_id].update_stat("goriot_credit", amount)

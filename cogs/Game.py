@@ -61,7 +61,7 @@ class Game(commands.Cog):
         
         amount = round(random.uniform(10, 25), 2)
         amount_back = round(random.uniform(amount/2, amount), 2)
-
+        self.stats_manager.update_stat(ctx.author.id, "steals", 1)
         self.stats_manager.give_credit(ctx.author.id, amount_back)
         self.stats_manager.give_credit(member.id, -amount)
         await ctx.send(f"Muahaha, {ctx.author.mention} je pokrao {amount} goriot kredita od {member.mention} i time se obogatio za {amount_back} goriot kredita.")
@@ -120,6 +120,22 @@ class Game(commands.Cog):
             return
         await self.active_polls[message.id](reaction)
 
+    @commands.command()
+    @player_only
+    async def ruznopogledaj(self, ctx, member: discord.Member = None):
+        if member == None:
+            await ctx.send(f"Koga?")
+            return
+        if self.stats_manager.get_stats()[ctx.author.id].get_data()['steals'] >= self.stats_manager.get_stats()[member.id].get_data()['steals']:
+            await ctx.send(f"Nije moguće osuditi osobu koja manje krade.")
+            return
+        unjudged_steals = self.stats_manager.get_stat(member.id, 'steals') - self.stats_manager.get_stat(member.id, 'judged_steals')
+        if unjudged_steals == 0:
+            await ctx.send(f"Osoba nema krađa koje nisu bile ružno pogledane.")
+            return
+        self.stats_manager.give_credit(ctx.author.id, 10 * unjudged_steals)
+        self.stats_manager.update_stat(member.id, 'judged_steals', unjudged_steals)
+        await ctx.send(f"{ctx.author.mention} je ružno pogledao {unjudged_steals} krađa koje je počinio {member.mention}, i time zaradio {10 * unjudged_steals} goriot kredita.")
 
 async def setup(bot):
     from main import stats_manager
