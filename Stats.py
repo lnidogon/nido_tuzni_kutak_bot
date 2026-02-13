@@ -22,7 +22,8 @@ class Stats:
         "gambling",
         
         "steals",
-        "judged_steals"
+        "judged_steals",
+        "judge"
         ]
 
     def __init__(self, **kwargs):
@@ -45,6 +46,11 @@ class Stats:
             print(f"{name} is not a stat")
         self.data[name] = self.data.get(name, 0) + coef
         
+    def set_stat(self, name: str, coef: float):
+        if name not in self.data:
+            print(f"{name} is not a stat")
+        self.data[name] = coef
+
     def normalise_factors(self):
         fvalue_list = [self.data.get(x, 0) for x in self.all_stats[0:6]]
         min_value = min(fvalue_list)

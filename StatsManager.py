@@ -19,7 +19,6 @@ class StatsManager:
     def __init__(self):
         self._lock = asyncio.Lock()
         self.load_stats()
-        self.load_stats()
 
 
     def load_stats(self):
@@ -67,6 +66,10 @@ class StatsManager:
     async def update_stat(self, member_id: int, name: str, amount: int):
         self.stats[member_id].update_stat(name, amount)
     
+    @save_func
+    async def set_stat(self, member_id: int, name: str, amount: int):
+        self.stats[member_id].set_stat(name, amount)
+
     @save_func
     async def give_credit(self, member_id: int, amount: float):
         self.stats[member_id].update_stat("goriot_credit", amount)

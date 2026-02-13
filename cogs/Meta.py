@@ -6,11 +6,12 @@ from utils import *
 
 
 class Meta(commands.Cog):
-    def __init__(self, bot, stats_manager: StatsManager):
+    def __init__(self, bot):
         self.bot = bot
-        self.stats_manager = stats_manager
+        self.stats_manager = bot.stats_manager
     @commands.command()
     async def zeliseigrati(self, ctx, member: discord.Member = None):
+        """Pridruži nekoga igri."""
         if member == None:
             await ctx.send(f"Tko?")
             return
@@ -23,6 +24,7 @@ class Meta(commands.Cog):
     #TODO: napraviti da samo bot moze postaviti bot_called na true
     @commands.command() 
     async def zelimseigrati(self, ctx, member: discord.Member = None, bot_called: bool = False):
+        """Pridruži se igri."""
         if member == None:
             member = ctx.author
         if await self.stats_manager.init_person(member.id):
@@ -36,12 +38,14 @@ class Meta(commands.Cog):
     @commands.command()
     @player_only
     async def kredit(self, ctx, member: discord.Member = None):
+        """Saznaj kredit neke osobe ili sebe."""
         if member == None:
             member = ctx.author 
         await ctx.send(f"{member.mention} ima {self.stats_manager.get_stats()[member.id].get_data().get('goriot_credit', 0)} goriot kredita")
 
     @commands.command()
     async def ljestvica(self, ctx):
+        """Saznaj kredit svih osoba."""
         table = []
         for member_id, stats in self.stats_manager.get_stats().items():
             member = ctx.guild.get_member(member_id)
@@ -55,14 +59,14 @@ class Meta(commands.Cog):
         lines = []
         lines.append(f"{'Ime'.ljust(name_width)} | {'Goriot kredit'.rjust(credit_width)}")
         lines.append(f"{'-' * name_width}-+-{'-' * credit_width}")
+        table.sort(key=lambda x: -x[1])
         for name, credit in table:
             lines.append(
                 f"{str(name).ljust(name_width)} | {str(credit).rjust(credit_width)}"
             )
-            
+        
         output_string = "```" + "\n".join(lines) + "```"
         await ctx.send(output_string)
 
 async def setup(bot):
-    from main import stats_manager
-    await bot.add_cog(Meta(bot, stats_manager))
+    await bot.add_cog(Meta(bot))

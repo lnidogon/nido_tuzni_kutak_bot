@@ -7,14 +7,18 @@ import math
 from functools import partial
 
 class Game(commands.Cog):
-    def __init__(self, bot, stats_manager: StatsManager):
+    def __init__(self, bot):
         self.active_polls = {}
         self.bot = bot
-        self.stats_manager = stats_manager
+        self.stats_manager = bot.stats_manager
 
     @commands.command()
     @player_only
     async def kopaj(self, ctx):
+        """
+        Iskopaj 1 - 5 goriot kredita.
+        """
+
         amount = random.gauss(1, 1.5)
         amount = round(amount)
         amount = max(1, min(amount, 5))
@@ -25,6 +29,7 @@ class Game(commands.Cog):
     @commands.command()
     @player_only
     async def kockaj(self, ctx, amount: float = 10.0):
+        """Uloži 10 - 100 goriot kredita, i osvoji nagrade do čak 10 puta iznosa!!!"""
         if amount < 10 or amount > 100:
             await ctx.send(f"Kuća neće prihvatiti tako smiješan ulog...")
             return
@@ -37,7 +42,7 @@ class Game(commands.Cog):
             [11, 0.2, f"Aj bar neš, {ctx.author.mention} je izgubio {0.8 * amount} goriot kredita. (-{0.8 * amount}gk)"],
             [12, 0.5, f"Pola kredita ošlo ća - sad ti je ža, sad ti je ža, {ctx.author.mention} je izgubio {0.5 * amount} goriot kredita. (-{0.5 * amount}gk)"],
             [20, 1, f"Ni da ni ne -  {ctx.author.mention} nije niti dobio, niti izgubio goriot kredit."],
-            [14,  1.5, f"Idemooo - {ctx.author.mention} je osvojio {0.5} goriot kredita. (+{0.5 * amount}gk)"],
+            [14,  1.5, f"Idemooo - {ctx.author.mention} je osvojio {0.5 * amount} goriot kredita. (+{0.5 * amount}gk)"],
             [20, 2, f"Mi smo toliko nazad - {ctx.author.mention} je osvojio {amount} goriot kredita. (+{amount}gk)"],
             [1, 10, f"DRAGI KAMEN UPOZORENJE - {ctx.author.mention} je osvojio glavnu nagradu i osvojio {10 * amount} goriot kredita!!! (+{10 * amount}gk)"]
         ]
@@ -49,6 +54,7 @@ class Game(commands.Cog):
     @commands.command()
     @player_only
     async def kradi(self, ctx, member: discord.Member = None):
+        """Pokradi osobi koja ima više kredita od tebe 25 kredita, ti dobivaš samo udio!"""
         if member == None:
             await ctx.send("Koga?")
             return
@@ -70,6 +76,7 @@ class Game(commands.Cog):
     @commands.command()
     @player_only
     async def hvala(self, ctx, member: discord.Member = None):
+        """Potroši 2 kredita kako bi se zahvalio osobi i njoj poklonio 5."""
         if member == None:
             await ctx.send("Kome?")
             return
@@ -85,7 +92,8 @@ class Game(commands.Cog):
 
     @commands.command()
     @player_only
-    async def glasovaj(self, ctx, amount: float = 40,member: discord.Member = None):
+    async def glasaj(self, ctx, amount: float = 40, member: discord.Member = None):
+        """Zatraži glasanje od {količina} goriot kredita, {količina}//20 osoba mora glasovati za."""
         if member == None:
             member = ctx.author
         min_votes  = math.floor(amount / 20)
@@ -123,20 +131,54 @@ class Game(commands.Cog):
     @commands.command()
     @player_only
     async def ruznopogledaj(self, ctx, member: discord.Member = None):
+        """Ružno pogledaj osobu koja krade više od tebe. Osoba gubi 15 kredita, a ti dobivaš 10 puta broj krađa koje nisu ružno pogledane. Ružno gledanje osoba koje kradu manje od tebe se kažnjava gubitkom od 10 goriot kredita."""
         if member == None:
             await ctx.send(f"Koga?")
             return
         if self.stats_manager.get_stats()[ctx.author.id].get_data()['steals'] >= self.stats_manager.get_stats()[member.id].get_data()['steals']:
-            await ctx.send(f"Nije moguće osuditi osobu koja manje krade.")
+            amount_taken = min(self.stats_manager.get_credit(ctx.author.id), 10)
+            await self.stats_manager.give_credit(ctx.author.id, -amount_taken)
+            await ctx.send(f"Nije moguće osuditi osobu koja manje krade. Oduzeto je {amount_taken} goriot kredita.")
             return
         unjudged_steals = self.stats_manager.get_stat(member.id, 'steals') - self.stats_manager.get_stat(member.id, 'judged_steals')
         if unjudged_steals == 0:
             await ctx.send(f"Osoba nema krađa koje nisu bile ružno pogledane.")
             return
+        amount_stolen_back = min(self.stats_manager.get_credit(member.id), 15)
+        await self.stats_manager.set_stat(ctx.author.id, 'judge', 1)
         await self.stats_manager.give_credit(ctx.author.id, 10 * unjudged_steals)
         await self.stats_manager.update_stat(member.id, 'judged_steals', unjudged_steals)
-        await ctx.send(f"{ctx.author.mention} je ružno pogledao {unjudged_steals} krađa koje je počinio {member.mention}, i time zaradio {10 * unjudged_steals} goriot kredita.")
+        await self.stats_manager.give_credit(member.id, -amount_stolen_back)
+        await ctx.send(f"{ctx.author.mention} je ružno pogledao {unjudged_steals} krađa koje je počinio {member.mention}, i time zaradio {10 * unjudged_steals} goriot kredita.\n\
+                       {member.mention} je kao kaznu za svoje grijehe izgubio {amount_stolen_back} goriot kredita.")
+
+
+    @commands.command()
+    @player_only
+    async def poljubi(self, ctx, member: discord.Member = None):
+        """Poljubi osobu koja je nekoga prije ružno pogledala kako bi dobio 30 goriot kredita, a ona izgubila 10. Ljubljenje već poljubljene osobe se kažnjava gubitkom 30 goriot kredita."""
+        if member == None:
+            await ctx.send(f"Koga?")
+            return
+        if member == ctx.author:
+            await ctx.send(f"Ne možes poljubiti samoga sebe.")
+            return
+        print(member.nick)
+        print(member.id)
+        print(int(self.stats_manager.get_stats()[member.id].get_data()['judge']))
+        if int(self.stats_manager.get_stats()[member.id].get_data()['judge']) == 0:
+            amount_taken = min(self.stats_manager.get_credit(ctx.author.id), 30)
+            await self.stats_manager.give_credit(ctx.author.id, -amount_taken)
+            await ctx.send(f"Osoba nije tužibaba. Policija je zgroženo oduzela {amount_taken} goriot kredita.")
+            return
+        amount_returned = min(self.stats_manager.get_credit(member.id), 10)
+        await self.stats_manager.set_stat(member.id, 'judge', 0)
+        await self.stats_manager.give_credit(ctx.author.id, 30)
+        await self.stats_manager.give_credit(member.id, -amount_returned)
+        await ctx.send(f"{ctx.author.mention} je nježno poljubio {member.mention} u čelo u nadi da će prestati biti takva tužibaba.\n\
+                       Centralna banka je ovakav čin ljubavi nagradila iznosom od 50 goriot kredita.\n\
+                       {member.mention} je kao pokoru donirao {amount_returned} goriot kredita u dobrotvorne svrhe.")
+
 
 async def setup(bot):
-    from main import stats_manager
-    await bot.add_cog(Game(bot, stats_manager))
+    await bot.add_cog(Game(bot))

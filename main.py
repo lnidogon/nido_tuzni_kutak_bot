@@ -35,7 +35,7 @@ class MyBot(commands.Bot):
         await self.load_extension("cogs.Game")
 
 bot = MyBot()
-
+bot.stats_manager = stats_manager
 
 @bot.event
 async def on_ready():
