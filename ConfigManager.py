@@ -56,7 +56,7 @@ class ConfigManager:
         return MappingProxyType(self.config)
 
     def get_config(self, name: str):
-        return MappingProxyType(self.config.get(name, 0))
+        return self.config.get(name, "")
 
     @save_func
     async def set_config(self, name: str, value: str):

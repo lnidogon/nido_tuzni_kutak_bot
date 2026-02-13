@@ -1,5 +1,6 @@
 from discord.ext import commands
 from StatsManager import StatsManager
+from ConfigManager import ConfigManager
 from discord.ext import commands
 from utils import *
 import random
@@ -10,7 +11,8 @@ class Game(commands.Cog):
     def __init__(self, bot):
         self.active_polls = {}
         self.bot = bot
-        self.stats_manager = bot.stats_manager
+        self.stats_manager: StatsManager = bot.stats_manager
+        self.config_manager: ConfigManager = bot.config_manager
 
     @commands.command()
     @player_only
@@ -29,8 +31,8 @@ class Game(commands.Cog):
     @commands.command()
     @player_only
     async def kockaj(self, ctx, amount: float = 10.0):
-        """Uloži 10 - 100 goriot kredita, i osvoji nagrade do čak 10 puta iznosa!!!"""
-        if amount < 10 or amount > 100:
+        """Uloži 10 - 1000 goriot kredita, i osvoji nagrade do čak 10 puta iznosa!!!"""
+        if amount < 10 or amount > 1000:
             await ctx.send(f"Kuća neće prihvatiti tako smiješan ulog...")
             return
         if self.stats_manager.get_stats()[ctx.author.id].get_data()["goriot_credit"] < amount:
@@ -94,30 +96,35 @@ class Game(commands.Cog):
     @player_only
     async def glasaj(self, ctx, amount: float = 40, member: discord.Member = None):
         """Zatraži glasanje od {količina} goriot kredita, {količina}//20 osoba mora glasovati za."""
+        if self.config_manager.get_config("pollkanal") == "":
+            await ctx.send(f"Molimo odaberite kanal za pollove.")
+            return
+        pollchannel_id =int(self.config_manager.get_config("pollkanal").strip("<#!>")) 
+        channel = self.bot.get_channel(pollchannel_id)
         if member == None:
             member = ctx.author
         min_votes  = math.floor(amount / 20)
         if amount < 40:
             await ctx.send(f"Iznos mora biti veći ili jednak 40.")
             return
-        message = await ctx.send(f"Zahtjev da {member.mention} dobije {amount} goriot kredita, potrebno je {min_votes} glasova. (👍)")
+        message = await channel.send(f"Zahtjev da {member.mention} dobije {amount} goriot kredita, potrebno je {min_votes} glasova. (👍)")
         await message.add_reaction("👍")
 
-        async def on_vote(author_id: int, amount: float, min_votes: int, reaction: discord.Reaction):
+        async def on_vote(ctx, message, author_id: int, amount: float, min_votes: int, reaction: discord.Reaction):
             if str(reaction.emoji) != "👍":
                 return
             users = set()
             async for u in reaction.users():
-                if not u.bot:
+                if not u.bot and u.id in self.stats_manager.get_stats().keys():
                     users.add(u.id)
             users.discard(author_id)
             if len(users) >= min_votes:
                 await self.stats_manager.give_credit(author_id, amount)
-                await message.channel.send(f"<@{author_id}> je zaradio {amount} goriot kredita!")
+                await ctx.send(f"<@{author_id}> je zaradio {amount} goriot kredita!")
                 await message.delete()
                 del self.active_polls[message.id]
 
-        self.active_polls[message.id] = partial(on_vote, member.id, amount, min_votes)
+        self.active_polls[message.id] = partial(on_vote, ctx, message, member.id, amount, min_votes)
 
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction, user):
@@ -161,11 +168,8 @@ class Game(commands.Cog):
             await ctx.send(f"Koga?")
             return
         if member == ctx.author:
-            await ctx.send(f"Ne možes poljubiti samoga sebe.")
+            await ctx.send(f"Ne možeš poljubiti samoga sebe.")
             return
-        print(member.nick)
-        print(member.id)
-        print(int(self.stats_manager.get_stats()[member.id].get_data()['judge']))
         if int(self.stats_manager.get_stats()[member.id].get_data()['judge']) == 0:
             amount_taken = min(self.stats_manager.get_credit(ctx.author.id), 30)
             await self.stats_manager.give_credit(ctx.author.id, -amount_taken)
@@ -179,6 +183,25 @@ class Game(commands.Cog):
                        Centralna banka je ovakav čin ljubavi nagradila iznosom od 50 goriot kredita.\n\
                        {member.mention} je kao pokoru donirao {amount_returned} goriot kredita u dobrotvorne svrhe.")
 
+    @commands.command()
+    @player_only
+    async def postujvelikogvodu(self, ctx):
+        """Dok je veliki vođa online ova naredba donosi 4-8 goriot kredita poput kopanja."""
+        voda_id = int(self.config_manager.get_config("velikivoda").strip("<@!>"))
+        voda = ctx.guild.get_member(voda_id)
+        if voda and voda.status == discord.Status.offline:
+            amount_taken_back = min(self.stats_manager.get_credit(ctx.author.id), 20)
+            await self.stats_manager.give_credit(ctx.author.id, -amount_taken_back)
+            await ctx.send(f"{ctx.author.mention} je pokušao zaraditi velikom vođi {voda.mention} iza leđa, time mu je oduzeto {amount_taken_back} goriot kredita za kaznu.")
+            return
+        if voda and voda.status != discord.Status.online:
+            await ctx.send(f"{ctx.author.mention} poštuje velikog vođu, ali vođa trenutno nešto drugo radi pa ga ne može opiti svojom snagom.")
+            return 
 
+        amount = random.gauss(4, 1.5)
+        amount = round(amount)
+        amount = max(4, min(amount, 9))
+        await self.stats_manager.give_credit(ctx.author.id, amount)
+        await ctx.send(f"{ctx.author.mention} je opijen snagom velikog vođe pronašao {amount} goriot kredita u svome srcu!")
 async def setup(bot):
     await bot.add_cog(Game(bot))
