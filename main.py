@@ -7,18 +7,20 @@ import asyncio
 from utils import *
 import re
 from StatsManager import StatsManager
-from functools import wraps
+from ConfigManager import ConfigManager
 from keywords import keywords
 
 load_dotenv()
 token = os.getenv('DISCORD_TOKEN')
 
 stats_manager = StatsManager()
+config_manager = ConfigManager()
 handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
 intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True  
 intents.reactions = True
+intents.presences = True
 
 class MyBot(commands.Bot):
     def __init__(self):
@@ -36,6 +38,7 @@ class MyBot(commands.Bot):
 
 bot = MyBot()
 bot.stats_manager = stats_manager
+bot.config_manager = config_manager
 
 @bot.event
 async def on_ready():

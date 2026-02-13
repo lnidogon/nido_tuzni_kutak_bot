@@ -2,3 +2,4 @@
 .secret
 stats.json
 *.tmp
+config.json

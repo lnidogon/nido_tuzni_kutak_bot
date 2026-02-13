@@ -1,5 +1,6 @@
 from discord.ext import commands
 from StatsManager import StatsManager
+from ConfigManager import ConfigManager
 import discord
 from discord.ext import commands
 from utils import *
@@ -8,14 +9,15 @@ from utils import *
 class Meta(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.stats_manager = bot.stats_manager
+        self.stats_manager: StatsManager = bot.stats_manager
+        self.config_manager: ConfigManager = bot.config_manager
     @commands.command()
     async def zeliseigrati(self, ctx, member: discord.Member = None):
         """Pridruži nekoga igri."""
         if member == None:
             await ctx.send(f"Tko?")
             return
-        if member.id == 662062425880789012:
+        if member.mention == self.config_manager.get_config("velikivoda"):
             await ctx.send("Veliki voda se ne tretira na ovaj nacin!")
             return
         await self.zelimseigrati(ctx, member, True)
@@ -67,6 +69,24 @@ class Meta(commands.Cog):
         
         output_string = "```" + "\n".join(lines) + "```"
         await ctx.send(output_string)
+
+    @commands.command()
+    async def config(self, ctx, name, value):
+        if name not in self.config_manager.get_all_config().keys():
+            await ctx.send(f"{name} nije postavka.")
+            return
+        await self.config_manager.set_config(name, value)
+        await ctx.send(f"Postavka {name} je uspješno promijenjena.")
+
+    @commands.command()
+    async def tkoje(self, ctx, name: str):
+        if name not in self.config_manager.get_all_config().keys():
+            await ctx.send(f"{name} nije postavka.")
+            return
+        if self.config_manager.get_config(name) == "":
+            await ctx.send(f"Nitko nije {name}.")
+            return
+        await ctx.send(f"{self.config_manager.get_config(name)} je {name}.")
 
 async def setup(bot):
     await bot.add_cog(Meta(bot))
