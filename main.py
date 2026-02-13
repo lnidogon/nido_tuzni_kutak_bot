@@ -43,6 +43,9 @@ bot.config_manager = config_manager
 @bot.event
 async def on_ready():
     print(f"We are ready to go {bot.user.name}")
+    pollchannel_id =int(config_manager.get_config("pollkanal").strip("<#!>")) 
+    channel = bot.get_channel(pollchannel_id)
+    await channel.send("Svi pollovi iznad ove poruke su zastarjeli.\n--------------------------------------------------------------")
 
 @bot.event
 async def on_member_join(member):

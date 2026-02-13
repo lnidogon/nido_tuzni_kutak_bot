@@ -25,6 +25,12 @@ class Stats:
         "judged_steals",
         "judge"
         ]
+    lower_bound: Dict[str, float] = {
+        "closetness" : 0,
+        "zahvalnost" : 0,
+        "pravicnost" : 0,
+        "benjavicnost" : 0,
+    }
 
     def __init__(self, **kwargs):
         self.data = {}
