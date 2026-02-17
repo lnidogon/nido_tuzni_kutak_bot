@@ -35,6 +35,7 @@ class MyBot(commands.Bot):
         await self.load_extension("cogs.Fun")
         await self.load_extension("cogs.Meta")
         await self.load_extension("cogs.Game")
+        await self.load_extension("cogs.GameEX")
 
 bot = MyBot()
 bot.stats_manager = stats_manager

@@ -23,7 +23,8 @@ class Stats:
         
         "steals",
         "judged_steals",
-        "judge"
+        "judge",
+
         ]
     lower_bound: Dict[str, float] = {
         "closetness" : 0,
