@@ -45,8 +45,8 @@ class GameEX(commands.Cog):
     @player_only
     async def upregni(self, ctx):
         if ctx.author.id not in self.upregnuti:
-            self.upregnuti[ctx.author.id] = set(range(1, 2))
-        if len(self.upregnuti[ctx.author.id]) == 0 or min(self.upregnuti[ctx.author.id]) > 1:
+            self.upregnuti[ctx.author.id] = set(range(1, 11))
+        if len(self.upregnuti[ctx.author.id]) == 0 or min(self.upregnuti[ctx.author.id]) > 10:
             await ctx.send(f"Sve pariške mačke koje te slušaju {ctx.author.mention} su već upregnute.")
             return
         if self.stats_manager.get_stat(ctx.author.id, "closetness") < 100:
