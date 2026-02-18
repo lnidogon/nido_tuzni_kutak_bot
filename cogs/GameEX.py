@@ -33,12 +33,12 @@ class GameEX(commands.Cog):
         if choice == 0:
             await self.stats_manager.give_credit(member.id, amount2)
             await self.stats_manager.give_credit(ctx.author.id, -amount2)
-            await self.stats_manager.update_stat(ctx.author.id, "gambling", amount2)
+            await self.stats_manager.update_stat(ctx.author.id, "gambling", -amount2)
             await ctx.send(f"U armagedonu {ctx.author.mention} je izgubio {amount2} goriot kredita koji je {member.mention} uspješno oteo.")
         else:
             await self.stats_manager.give_credit(member.id, -amount1)
             await self.stats_manager.give_credit(ctx.author.id, amount1)
-            await self.stats_manager.update_stat(ctx.author.id, "gambling", -amount1) 
+            await self.stats_manager.update_stat(ctx.author.id, "gambling", amount1) 
             await ctx.send(f"U armagedonu {member.mention} je izgubio {amount1} goriot kredita koji je {ctx.author.mention} uspješno oteo.")
             
 
