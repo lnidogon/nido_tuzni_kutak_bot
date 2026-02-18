@@ -24,6 +24,7 @@ class GameEX(commands.Cog):
             return
         if self.stats_manager.get_credit(member.id) > self.stats_manager.get_credit(ctx.author.id):
             await ctx.send("Armagedon ne radi ako osoba ima više kredita.")
+            return
         choice = randint(0, 1)
         amount1 = self.stats_manager.get_credit(member.id)
         amount2 = self.stats_manager.get_credit(ctx.author.id)
