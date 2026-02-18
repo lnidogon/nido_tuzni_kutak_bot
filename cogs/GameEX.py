@@ -58,12 +58,12 @@ class GameEX(commands.Cog):
             await ctx.send(f"Pariška mačka pod rednim brojem {idx} je upregnuta u ime {ctx.author.mention}.")
             self.upregnuti[ctx.author.id].remove(idx)
         await asyncio.sleep(5)
-        for _ in range(randint(20, 30)):
-            amount = round(gauss(1, 1))
+        for _ in range(randint(4, 6)):
+            amount = round(gauss(5, 5))
             amount = min(3, max(1, amount))
             await self.stats_manager.give_credit(ctx.author.id, amount)
             await ctx.send(f"Pariška mačka pod rednim brojem {idx} je iskopala {amount} goriot kredita u ime {ctx.author.mention}.")
-            await asyncio.sleep(randint(1, 2) * 60)
+            await asyncio.sleep(randint(1, 2) * 300)
         async with self.cat_lock:
             await ctx.send(f"Pariška mačka pod rednim brojem {idx} se vratila u sobu {ctx.author.mention} nakon svoje borbe.")
             self.upregnuti[ctx.author.id].add(idx)
