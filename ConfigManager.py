@@ -16,6 +16,7 @@ class ConfigManager:
     all_configs = [
         "demba",
         "velikivoda",
+        "ulogasmrti",
         "kanalsmrti",
         "goriotpolicija",
         "pollkanal",

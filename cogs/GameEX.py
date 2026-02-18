@@ -3,7 +3,7 @@ from StatsManager import StatsManager
 from ConfigManager import ConfigManager
 from discord.ext import commands
 from utils import *
-from random import randint, gauss
+from random import randint, gauss, uniform
 
 class GameEX(commands.Cog):
     def __init__(self, bot):
@@ -70,8 +70,31 @@ class GameEX(commands.Cog):
             self.upregnuti[ctx.author.id].add(idx)
     @commands.command()
     @player_only
-    async def djecjisan(self, ctx, member: discord.Member = None):
-        pass
+    async def rucnokradi(self, ctx, member: discord.Member = None):
+        if member == None or member == ctx.author:
+            await ctx.send("Za ručnu krađu je potrebno dvoje.")
+            return
+        if self.stats_manager.get_stat(ctx.author.id, "zloba") < 100:
+            await ctx.send("Ovakvu vrstu krađe mogu raditi samo oni s dovoljno tmine u duši.")
+            return 
+        choice = randint(0, 2)
+        await self.stats_manager.update_stat(ctx.author.id, "benjavicnost", -40)
+        amount = round(uniform(10, 25), 2)
+        amount = min(amount, self.stats_manager.get_credit(member.id))
+        amount_back = round(uniform(amount/2, amount), 2)
+        await self.stats_manager.update_stat(ctx.author.id, "zloba", amount * 2)
+        await self.stats_manager.update_stat(ctx.author.id, "zahvalnost", -amount)
+        await self.stats_manager.update_stat(ctx.author.id, "pravicnost", -2)
+        await self.stats_manager.update_stat(ctx.author.id, "steals", 1)
+        await self.stats_manager.give_credit(ctx.author.id, amount_back)
+        await self.stats_manager.give_credit(member.id, -amount)
+        await ctx.send(f"Pod prijetnjom franuckse bajunete, {ctx.author.mention} je ukrao {amount} goriot kredita {member.mention} i time se obogatio za {amount_back} goriot kredita.")
+        if choice == 0:
+            await asyncio.sleep(5)
+            await ctx.send(f"Zapravo nije bila prijetnja - bila je najava, 'đenja")
+            await asyncio.sleep(1)
+            await onezivi(ctx, member, self.stats_manager, self.config_manager)
+
         
 async def setup(bot):
     await bot.add_cog(GameEX(bot))

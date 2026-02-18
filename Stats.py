@@ -24,6 +24,8 @@ class Stats:
         "steals",
         "judged_steals",
         "judge",
+        "kills",
+        "dead",
 
         ]
     lower_bound: Dict[str, float] = {

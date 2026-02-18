@@ -6,6 +6,9 @@ from dotenv import load_dotenv
 import os
 import asyncio
 
+from ConfigManager import ConfigManager
+from StatsManager import StatsManager
+
 def player_only(func):
     @wraps(func)
     async def wrapper(self, ctx, *args, **kwargs):
@@ -63,7 +66,7 @@ async def color(ctx, member: discord.Member, hexcode: str):
     color = discord.Color(color_value)
     role_name = f"Goriot-blagoslov-{member.id}"
     role = discord.utils.get(guild.roles, name=role_name)
-    target_position = guild.me.top_role.position - 1
+    target_position = guild.me.top_role.position - 2
     if role is None:
         role = await guild.create_role(
             name=role_name,
@@ -76,3 +79,19 @@ async def color(ctx, member: discord.Member, hexcode: str):
 def regify(s: str):
     rets = '.*?'.join(s)
     return rets
+
+async def onezivi(ctx, member: discord.Member, stats_manager: StatsManager, config_manager: ConfigManager):
+    if "ulogasmrti" not in config_manager.get_all_config():
+        await ctx.send("Uloga smrti nije postavljena")
+        return
+    if stats_manager.get_stat(member.id, "dead") == 1:
+        await ctx.send(f"{ctx.mention} je već mrtav.")
+        return
+    uloga_id = int(config_manager.get_config("ulogasmrti").strip("<@&>"))
+    uloga = ctx.guild.get_role(uloga_id)
+    await stats_manager.set_stat(member.id, "dead", 1)
+    await member.add_roles(uloga)
+    current_nick = member.nick if member.nick else member.name
+    new_nick = f"{current_nick[:30]} 🪦"
+    await member.edit(nick=new_nick)
+    await ctx.send(f"Umro je drug {member.mention}.")
