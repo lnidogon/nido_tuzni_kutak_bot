@@ -61,7 +61,7 @@ class GameEX(commands.Cog):
         await asyncio.sleep(5)
         for _ in range(randint(4, 6)):
             amount = round(gauss(5, 5))
-            amount = min(3, max(1, amount))
+            amount = min(15, max(5, amount))
             await self.stats_manager.give_credit(ctx.author.id, amount)
             await ctx.send(f"Pariška mačka pod rednim brojem {idx} je iskopala {amount} goriot kredita u ime {ctx.author.mention}.")
             await asyncio.sleep(randint(1, 2) * 300)
