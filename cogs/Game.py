@@ -20,6 +20,7 @@ class Game(commands.Cog):
         """
         Iskopaj 1 - 5 goriot kredita.
         """
+        await self.stats_manager.update_stat(ctx.author.id, "zahvalnost", 5)
         await self.stats_manager.update_stat(ctx.author.id, "benjavicnost", 1)
         await self.stats_manager.update_stat(ctx.author.id, 'closetness', 1)
         amount = random.gauss(1, 1.5)
@@ -99,7 +100,7 @@ class Game(commands.Cog):
             await ctx.send("Nedovoljno goriot kredita za zahvalu.")
             return
         await self.stats_manager.update_stat(ctx.author.id, "benjavicnost", 5)
-        await self.stats_manager.update_stat(ctx.author.id, "zahvalnost", 5)
+        await self.stats_manager.update_stat(ctx.author.id, "zahvalnost", 100)
         await self.stats_manager.give_credit(ctx.author.id, -2)
         await self.stats_manager.give_credit(member.id, 5)
         await ctx.send(f"Holsom, {ctx.author.mention} je donirao 5 goriot kredita  {member.mention} iz zahvale.")
@@ -135,7 +136,7 @@ class Game(commands.Cog):
             if len(users) >= min_votes:
                 async for u in reaction.users():
                     if not u.bot and u.id in self.stats_manager.get_stats().keys():
-                        await self.stats_manager.update_stat(u.id, "zahvalnost", 20)
+                        await self.stats_manager.update_stat(u.id, "zahvalnost", 50)
                         await self.stats_manager.update_stat(u.id, "zloba", -20)
                 await self.stats_manager.update_stat(author_id, "pravicnost", min_votes)
                 await self.stats_manager.give_credit(author_id, amount)
