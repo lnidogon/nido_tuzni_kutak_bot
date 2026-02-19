@@ -48,7 +48,8 @@ async def on_ready():
     print(f"We are ready to go {bot.user.name}")
     pollchannel_id =int(config_manager.get_config("pollkanal").strip("<#!>")) 
     channel = bot.get_channel(pollchannel_id)
-    await channel.send("Svi pollovi iznad ove poruke su zastarjeli.\n--------------------------------------------------------------")
+    if channel:
+        await channel.purge(limit=None, check=lambda m: m.author == bot.user)
     for guild in bot.guilds:
         async for member in guild.fetch_members(limit=None):
             if member.id not in bot.stats_manager.get_stats().keys():
