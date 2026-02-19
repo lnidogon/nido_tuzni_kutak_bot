@@ -81,3 +81,10 @@ class StatsManager:
             return False
         self.stats[member_id] = Stats()
         return True
+    
+    @save_func
+    async def remove_person(self, member_id: int):
+        if(member_id in self.stats.keys()):
+            del self.stats[member_id]
+            return True
+        return False

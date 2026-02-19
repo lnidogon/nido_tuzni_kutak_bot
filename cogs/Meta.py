@@ -38,6 +38,12 @@ class Meta(commands.Cog):
             await ctx.send(f"Cijenim tvoju veliku želju za igranjem, ali jedna prijava je dovoljna!") 
 
     @commands.command()
+    async def sigurnarijec(self, ctx):
+        if await self.stats_manager.remove_person(ctx.author.id):
+            await ctx.send(f"{ctx.author.mention} je nažalost odlucila izaci iz igre.")
+        else:
+            await ctx.send(f"Osoba nije clan igre.")
+    @commands.command()
     @player_only
     async def kredit(self, ctx, member: discord.Member = None):
         """Saznaj kredit neke osobe ili sebe."""
