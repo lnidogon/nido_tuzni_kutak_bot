@@ -38,9 +38,9 @@ class Meta(commands.Cog):
             await ctx.send(f"Cijenim tvoju veliku želju za igranjem, ali jedna prijava je dovoljna!") 
 
     @commands.command()
-    async def sigurnarijec(self, ctx):
-        if await self.stats_manager.remove_person(ctx.author.id):
-            await ctx.send(f"{ctx.author.mention} je nažalost odlucila izaci iz igre.")
+    async def sigurnarijec(self, ctx, member: discord.Member):
+        if await self.stats_manager.remove_person(member.id):
+            await ctx.send(f"{member.mention} je nažalost odlucila izaci iz igre.")
         else:
             await ctx.send(f"Osoba nije clan igre.")
     @commands.command()
