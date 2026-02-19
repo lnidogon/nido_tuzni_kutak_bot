@@ -47,7 +47,11 @@ async def on_ready():
     pollchannel_id =int(config_manager.get_config("pollkanal").strip("<#!>")) 
     channel = bot.get_channel(pollchannel_id)
     await channel.send("Svi pollovi iznad ove poruke su zastarjeli.\n--------------------------------------------------------------")
-
+    for guild in bot.guilds:
+        async for member in guild.fetch_members(limit=None):
+            if member.id not in bot.stats_manager.get_stats().keys():
+                continue
+            await setupziv(guild, member, bot.stats_manager, bot.config_manager)
 @bot.event
 async def on_member_join(member):
     await member.send(f"Stiti cu {member.name} zauvijek")

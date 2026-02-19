@@ -94,7 +94,32 @@ class GameEX(commands.Cog):
             await ctx.send(f"Zapravo nije bila prijetnja - bila je najava, 'đenja")
             await asyncio.sleep(1)
             await onezivi(ctx, member, self.stats_manager, self.config_manager)
-
-        
+    @commands.command()
+    @player_only
+    async def pomoliseza(self, ctx, member: discord.Member = None):
+        if member == None or member == ctx.author:
+            await ctx.send("Za koga?")
+            return
+        if self.stats_manager.get_stat(ctx.author.id, "zahvalnost") < 1000:
+            await ctx.send("Moliti se mogu samo oni koji su zahvalni za svoje prijatelje.")
+            return 
+        if self.stats_manager.get_credit(ctx.author.id) < 100:
+            await ctx.send("Nedovoljno kredita za molitvu.")
+            return
+        choice = randint(0, 2)
+        await self.stats_manager.give_credit(ctx.author.id, -100 * 0)
+        await self.stats_manager.update_stat(ctx.author.id, "benjavicnost", 50)
+        await self.stats_manager.update_stat(ctx.author.id, "zahvalnost", 200)
+        await self.stats_manager.update_stat(ctx.author.id, "benjavicnost", -40)
+        await ctx.send(f"{ctx.author.mention} se pomolio za {member.mention}... (također platio 100 goriot kredita instituciji)")
+        await asyncio.sleep(5)
+        if self.stats_manager.get_stat(member.id, "dead") == 0:
+            await ctx.send(f"Osoba {member.mention} nije mrtva, ali molitva se cijeni.")
+            return
+        if choice == 0:
+            await ctx.send(f"Molitva je bila uspješna!!! Poruka sponzora: 没问题")
+            await ozivi(ctx, member, self.stats_manager, self.config_manager)
+        else:
+            await ctx.send(f"Molitva nije postigla ništa, zanmljivo kako to radi.") 
 async def setup(bot):
     await bot.add_cog(GameEX(bot))
