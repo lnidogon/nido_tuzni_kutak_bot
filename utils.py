@@ -1,9 +1,5 @@
 from functools import wraps
 import discord
-from discord.ext import commands
-import logging 
-from dotenv import load_dotenv
-import os
 import asyncio
 
 from ConfigManager import ConfigManager
@@ -12,13 +8,12 @@ from StatsManager import StatsManager
 def player_only(func):
     @wraps(func)
     async def wrapper(self, ctx, *args, **kwargs):
-        from main import stats_manager
-        if not stats_manager.is_playing_the_game(ctx.author.id):
+        if not ctx.bot.stats_manager.is_playing_the_game(ctx.author.id):
             await ctx.send("Molimo prijavite se kako biste koristili ovu naredbu!")
             return
         for arg in args:
             if isinstance(arg, discord.Member):
-                if arg.id not in stats_manager.get_stats():
+                if arg.id not in ctx.bot.stats_manager.get_stats():
                     await ctx.send("Spominje se osoba koja nije prijavljena!")
                     return
         return await func(self, ctx, *args, **kwargs)

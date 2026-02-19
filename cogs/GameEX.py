@@ -107,7 +107,7 @@ class GameEX(commands.Cog):
             await ctx.send("Nedovoljno kredita za molitvu.")
             return
         choice = randint(0, 2)
-        await self.stats_manager.give_credit(ctx.author.id, -100 * 0)
+        await self.stats_manager.give_credit(ctx.author.id, -100)
         await self.stats_manager.update_stat(ctx.author.id, "benjavicnost", 50)
         await self.stats_manager.update_stat(ctx.author.id, "zahvalnost", 200)
         await self.stats_manager.update_stat(ctx.author.id, "benjavicnost", -40)

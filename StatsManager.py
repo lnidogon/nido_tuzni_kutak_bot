@@ -18,20 +18,19 @@ class StatsManager:
     stats: Dict[int, Stats]
     def __init__(self):
         self._lock = asyncio.Lock()
-        self.load_stats()
 
+    async def load_stats(self):
+        async with self._lock:
+            if not self.STATS_FILE.exists():
+                self.stats = {}
+                return
+            with open(self.STATS_FILE, "r") as f:
+                loaded_data = json.load(f)
 
-    def load_stats(self):
-        if not self.STATS_FILE.exists():
-            self.stats = {}
-            return
-        with open(self.STATS_FILE, "r") as f:
-            loaded_data = json.load(f)
-
-        self.stats = {
-            int(member_id): Stats.from_dict(stat_data)
-            for member_id, stat_data in loaded_data.items()
-        }
+            self.stats = {
+                int(member_id): Stats.from_dict(stat_data)
+                for member_id, stat_data in loaded_data.items()
+            }
 
     async def save_stats(self):
         async with self._lock:
@@ -46,6 +45,7 @@ class StatsManager:
 
     def get_stats(self):
         return MappingProxyType(self.stats)
+
     
     def get_stat(self, id: int, name: str):
         return self.get_stats()[id].get_data()[name]

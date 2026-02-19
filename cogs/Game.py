@@ -63,7 +63,6 @@ class Game(commands.Cog):
     @player_only
     async def kradi(self, ctx, member: discord.Member = None):
         """Pokradi osobi koja ima više kredita od tebe 25 kredita, ti dobivaš samo udio!"""
-
         if member == None:
             await ctx.send("Koga?")
             return

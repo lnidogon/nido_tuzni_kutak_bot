@@ -25,22 +25,22 @@ class ConfigManager:
     config: Dict[str, str]
     def __init__(self):
         self._lock = asyncio.Lock()
-        self.load_config()
+        
 
-
-    def load_config(self):
-        if not self.CONFIG_FILE.exists():
-            self.config = {}
-            return
-        with open(self.CONFIG_FILE, "r") as f:
-            loaded_data = json.load(f)
-        self.config = {
-            key: value
-            for key, value in loaded_data.items()
-        }
-        for c in self.all_configs:
-            if c not in self.config:
-                self.config[c] = ""
+    async def load_config(self):
+        async with self._lock:
+            if not self.CONFIG_FILE.exists():
+                self.config = {}
+                return
+            with open(self.CONFIG_FILE, "r") as f:
+                loaded_data = json.load(f)
+            self.config = {
+                key: value
+                for key, value in loaded_data.items()
+            }
+            for c in self.all_configs:
+                if c not in self.config:
+                    self.config[c] = ""
       
     async def save_config(self):
         async with self._lock:
