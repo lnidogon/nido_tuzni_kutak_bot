@@ -1,6 +1,7 @@
 from discord.ext import commands
 from StatsManager import StatsManager
 from ConfigManager import ConfigManager
+from cogs.PollManager import PollManager
 from discord.ext import commands
 from utils import *
 import random
@@ -9,8 +10,8 @@ from functools import partial
 
 class Game(commands.Cog):
     def __init__(self, bot):
-        self.active_polls = {}
         self.bot = bot
+        self.poll_manager: PollManager = bot.get_cog("PollManager")
         self.stats_manager: StatsManager = bot.stats_manager
         self.config_manager: ConfigManager = bot.config_manager
 
@@ -141,18 +142,9 @@ class Game(commands.Cog):
                 await self.stats_manager.give_credit(author_id, amount)
                 await ctx.send(f"<@{author_id}> je zaradio {amount} goriot kredita!")
                 await message.delete()
-                del self.active_polls[message.id]
+                del self.poll_manager.active_polls[message.id]
 
-        self.active_polls[message.id] = partial(on_vote, ctx, message, member.id, amount, min_votes)
-
-    @commands.Cog.listener()
-    async def on_reaction_add(self, reaction, user):
-        if user.bot:
-            return
-        message = reaction.message
-        if message.id not in self.active_polls:
-            return
-        await self.active_polls[message.id](reaction)
+        self.poll_manager.active_polls[message.id] = partial(on_vote, ctx, message, member.id, amount, min_votes)
 
     @commands.command()
     @player_only
@@ -198,8 +190,12 @@ class Game(commands.Cog):
             return
         await self.stats_manager.update_stat(ctx.author.id, "sus", 5)
         await self.stats_manager.update_stat(ctx.author.id, "benjavicnost", 20)
-        
         if int(self.stats_manager.get_stats()[member.id].get_data()['judge']) == 0:
+            if int(member.id) == int(self.stats_manager.get_stat(ctx.author.id, "partner")):
+                await ctx.send(f"Iako osoba nije tužibaba, ljubav unutar bračne zajednice je dopuštena, awek.\n{ctx.author.mention} i {member.mention} oboje dobivaju 10 goriot kredita.")
+                await self.stats_manager.give_credit(member.id, 10)
+                await self.stats_manager.give_credit(ctx.author.id, 10)
+                return
             amount_taken = min(self.stats_manager.get_credit(ctx.author.id), 30)
             await self.stats_manager.give_credit(ctx.author.id, -amount_taken)
             await ctx.send(f"Osoba nije tužibaba. Policija je zgroženo oduzela {amount_taken} goriot kredita.")

@@ -80,20 +80,20 @@ async def onezivi(ctx, member: discord.Member, stats_manager: StatsManager, conf
         await ctx.send("Uloga smrti nije postavljena")
         return
     if stats_manager.get_stat(member.id, "dead") == 1:
-        await ctx.send(f"{member.mention} je već mrtav.")
+        await ctx.send(f"{member.mention} već spava.")
         return
     uloga_id = int(config_manager.get_config("ulogasmrti").strip("<@&>"))
     uloga = ctx.guild.get_role(uloga_id)
     await stats_manager.set_stat(member.id, "dead", 1)
     await member.add_roles(uloga)
     current_nick = member.nick if member.nick else member.name
-    new_nick = f"{current_nick[:30]} 🪦"
+    new_nick = f"{current_nick[:30]} 💤"
     if member.top_role.position < ctx.guild.me.top_role.position:
         try:
             await member.edit(nick=new_nick)
         except:
             print("Can't change that name")
-    await ctx.send(f"Umro je drug {member.mention}.")
+    await ctx.send(f"Zaspao je drug {member.mention}.")
 
 async def ozivi(ctx, member: discord.Member, stats_manager: StatsManager, config_manager: ConfigManager):
     if "ulogasmrti" not in config_manager.get_all_config():
@@ -107,7 +107,7 @@ async def ozivi(ctx, member: discord.Member, stats_manager: StatsManager, config
     await stats_manager.set_stat(member.id, "dead", 0)
     await member.remove_roles(uloga)
     current_nick = member.nick if member.nick else member.name
-    if current_nick[-2:] == " 🪦":
+    if current_nick[-2:] == " 💤":
         new_nick = current_nick[:-2]
     else:
         new_nick = current_nick
@@ -116,7 +116,7 @@ async def ozivi(ctx, member: discord.Member, stats_manager: StatsManager, config
             await member.edit(nick=new_nick)
         except:
             print("Can't change that name")
-    await ctx.send(f"Uzašao je iz mrtvih drug {member.mention}.")
+    await ctx.send(f"Uzašao je iz zaspalih drug {member.mention}.")
 
 async def setupziv(guild: discord.Guild, member: discord.Member, stats_manager: StatsManager, config_manager: ConfigManager):
     if "ulogasmrti" not in config_manager.get_all_config():
@@ -126,12 +126,12 @@ async def setupziv(guild: discord.Guild, member: discord.Member, stats_manager: 
     current_nick = member.nick if member.nick else member.name
     new_nick = current_nick[:]
     if stats_manager.get_stat(member.id, "dead") == 0:
-        if current_nick[-2:] == " 🪦":
+        if current_nick[-2:] == " 💤":
             new_nick = current_nick[:-2]
         await member.remove_roles(uloga)
     else:
-        if current_nick[-2:] != " 🪦": 
-            new_nick = f"{current_nick[:30]} 🪦"
+        if current_nick[-2:] != " 💤": 
+            new_nick = f"{current_nick[:30]} 💤"
         await member.add_roles(uloga)
     if member.top_role.position < guild.me.top_role.position:
         try:

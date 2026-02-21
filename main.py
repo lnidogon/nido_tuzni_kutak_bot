@@ -34,6 +34,7 @@ class MyBot(commands.Bot):
     async def setup_hook(self):
         await self.config_manager.load_config()
         await self.stats_manager.load_stats()
+        await self.load_extension("cogs.PollManager")
         await self.load_extension("cogs.Fun")
         await self.load_extension("cogs.Meta")
         await self.load_extension("cogs.Game")

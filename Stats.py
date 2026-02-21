@@ -1,5 +1,6 @@
 from typing import List, Dict
 from types import MappingProxyType
+import math
 class Stats:
     data: Dict[str, float]
     all_stats: List[str] = [
@@ -26,6 +27,7 @@ class Stats:
         "judge",
         "kills",
         "dead",
+        "partner",
 
         ]
     lower_bound: Dict[str, float] = {
@@ -35,10 +37,14 @@ class Stats:
         "benjavicnost" : 0,
     }
 
+    int_stats: List[str] = {
+        "partner", "judge", "kills", "dead", "steals", "judged_steals"
+    }
+
     def __init__(self, **kwargs):
         self.data = {}
         if kwargs:
-            self.data  = {key: float(val) for key, val in kwargs.items()}
+            self.data  = {key: float(val) if key not in self.int_stats else int(val) for key, val in kwargs.items()}
         self.actualise()
     def actualise(self):
         for stat in self.all_stats:
@@ -55,7 +61,7 @@ class Stats:
             print(f"{name} is not a stat")
         self.data[name] = self.data.get(name, 0) + coef
         
-    def set_stat(self, name: str, coef: float):
+    def set_stat(self, name: str, coef):
         if name not in self.data:
             print(f"{name} is not a stat")
         self.data[name] = coef
