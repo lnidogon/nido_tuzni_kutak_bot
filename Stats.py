@@ -44,7 +44,7 @@ class Stats:
     def __init__(self, **kwargs):
         self.data = {}
         if kwargs:
-            self.data  = {key: float(val) if key not in self.int_stats else int(float(val)) for key, val in kwargs.items()}
+            self.data  = {key: float(val) if key not in self.int_stats else int(val) for key, val in kwargs.items()}
         self.actualise()
     def actualise(self):
         for stat in self.all_stats:
